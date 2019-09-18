@@ -1,32 +1,11 @@
 import random
+import statistics
 
+from tabulate import tabulate
 import matplotlib.pyplot as plt
 
-import given_files.drawtree_qt5 as drawtree
 import given_files.dtree as dtree
-import given_files.monkdata as monkdata
-
-
-"""
-Assignment 6:
-
-The depth/complexity of a decision tree determines the variance. By pruning we're simplifying the tree and therefore are
-reducing the variance (reduces overfitting). Bias does not seem to be affected by prunning.
-"""
-
-
-"""
-Assignment 7:
-
-
-"""
-
-
-def partition(data, fraction):
-    ldata = list(data)
-    random.shuffle(ldata)
-    breakPoint = int(len(ldata) * fraction)
-    return ldata[:breakPoint], ldata[breakPoint:]
+import given_files.monkdata as m
 
 
 def get_best_tree(currtree):
@@ -39,44 +18,60 @@ def get_best_tree(currtree):
 
     if found_better_tree:
         currtree = get_best_tree(currtree)
-
     return currtree
+
+
+
+def partition(data, fraction):
+    ldata = list(data)
+    random.shuffle(ldata)
+    breakPoint = int(len(ldata) * fraction)
+    return ldata[:breakPoint], ldata[breakPoint:]
 
 
 if __name__ == '__main__':
 
-    n = 100
-    datasets = (monkdata.monk1, monkdata.monk3)
     dataset_names = ('MONK-1', 'MONK-3')
+    datasets = (m.monk1, m.monk3)
+    datasets_test = (m.monk1test, m.monk3test)
+
     fractions = (0.3, 0.4, 0.5, 0.6, 0.7, 0.8)
+    decimals = 3
+    n = 1000
 
-    for dataset, dataset_name in zip(datasets, dataset_names):
+    header = ['Fraction', 'Mean error (n = {})'.format(n), 'Standard deviation']
 
-        s = '--- {} ---\nFraction\tMean accuracy\n'.format(dataset_name)
-        means = list()
+    for dataset_name, dataset, dataset_test in zip(dataset_names, datasets, datasets_test):
+
+        data = []
+        mean_errors = []
+        stdev = []
 
         for fraction in fractions:
 
-            mean = 0
+            errors = []
 
             for i in range(n):
                 monktrain, monkval = partition(dataset, fraction)
+                built_tree = dtree.buildTree(monktrain, m.attributes)
+                best_tree = get_best_tree(built_tree)
 
-                basetree = dtree.buildTree(monktrain, monkdata.attributes)
-                besttree = get_best_tree(basetree)
+                errors.append(1 - dtree.check(best_tree, dataset_test))
 
-                mean += (1 - dtree.check(besttree, monkval)) / n * 100
+            mean_error = round(statistics.mean(errors), decimals)
+            mean_errors.append(round(statistics.mean(errors), decimals))
 
-            s += '{}\t\t\t{}\n'.format(fraction, round(mean, 5))
-            means.append(mean)
+            stdev.append(round(statistics.stdev(errors), decimals))
 
-        print(s)
+            data.append([fraction, mean_error, statistics.mean(stdev)])
 
-        plt.plot(fractions, means, marker='o', label=dataset_name)
+        print(tabulate(data, header), '\n')
 
-    plt.title('Classification error for each fraction (n = {})'.format(n))
-    plt.legend()
-    plt.xlabel('fraction')
-    plt.ylabel('classification error [%]'.format(n))
+        plt.plot(fractions, mean_errors, marker='o', label='Mean error (test)', color=(0, 0, 1))
+        plt.plot(fractions, stdev, marker='o', label='Standard deviation (test)', color=(0.6, 0.6, 1))
 
-    plt.show()
+        plt.title('{} (n = {})'.format(dataset_name, n))
+        plt.legend()
+        plt.xlabel('Fraction')
+        plt.ylabel('Mean Error')
+        plt.show()
