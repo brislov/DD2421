@@ -5,7 +5,7 @@ import numpy as np
 
 
 def K(x, y,):
-    """ Linear kernal function. """
+    """ Linear kernel function. """
     return np.dot(x, y)
 
 
