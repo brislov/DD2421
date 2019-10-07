@@ -118,7 +118,7 @@ def plot():
     filename = 'svmplot{}.png'
     while os.path.isfile(filename.format(counter)):
         counter += 1
-    plt.savefig(filename.format(counter))
+    plt.savefig(filename.format(counter), bbox_inches='tight')
 
     plt.show()
 
