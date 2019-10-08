@@ -70,8 +70,8 @@ def plot():
     lst = [p for p in SVs['x'] if p in classB]
     ax.plot([p[0] for p in lst], [p[1] for p in lst], 'rx', label='Support Vector')
 
-    xgrid = np.linspace(-3, 3)
-    ygrid = np.linspace(-2, 2)
+    xgrid = np.linspace(-5, 5)
+    ygrid = np.linspace(-4, 4)
     grid = np.array([[ind([x, y]) for x in xgrid] for y in ygrid])
     ax.contour(xgrid, ygrid, grid, (-1.0, 0.0, 1.0), colors=('red', 'black', 'blue'), linewidths=(0.5, 1.0, 0.5))
 
@@ -133,17 +133,23 @@ def zerofun(alpha):
 
 if __name__ == '__main__':
 
-    kernel_params = {'type': 'lin', 'p': 2, 'sigma': 1}
+    np.random.seed(100)
 
-    classA_params = {'nr_samples': [10, 10], 'origin': [[-1.5, 0.5], [1.5, 0.5]], 'spread': [0.2, 0.2]}
-    classB_params = {'nr_samples': 20, 'origin': [0.0, -0.5], 'spread': 0.2}
+    kernel_params = {'type': 'rbf', 'p': 2, 'sigma': 0.9}
 
-    C_param = None
+    classA_params = {'nr_samples': [10, 10], 'origin': [[-2, 0.5], [2.0, 0.5]], 'spread': [0.5, 0.5]}
+    classB_params = {'nr_samples': 20, 'origin': [0.0, 0.0], 'spread': 0.7}
+
+    C_param = 50
 
     classA = np.concatenate((
         np.random.randn(classA_params['nr_samples'][0], 2) * classA_params['spread'][0] + classA_params['origin'][0],
         np.random.randn(classA_params['nr_samples'][1], 2) * classA_params['spread'][1] + classA_params['origin'][1]))
     classB = np.random.randn(classB_params['nr_samples'], 2) * classB_params['spread'] + classB_params['origin']
+
+    classB = list(classB)
+    classB.append([2, 0])
+    classB = np.array(classB)
 
     inputs = np.concatenate((classA, classB))
     targets = np.concatenate((np.ones(classA.shape[0]), -np.ones(classB.shape[0])))
