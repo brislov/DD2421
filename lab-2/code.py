@@ -135,21 +135,17 @@ if __name__ == '__main__':
 
     np.random.seed(100)
 
-    kernel_params = {'type': 'rbf', 'p': 2, 'sigma': 0.9}
+    kernel_params = {'type': 'lin', 'p': 2, 'sigma': 1}
 
-    classA_params = {'nr_samples': [10, 10], 'origin': [[-2, 0.5], [2.0, 0.5]], 'spread': [0.5, 0.5]}
-    classB_params = {'nr_samples': 20, 'origin': [0.0, 0.0], 'spread': 0.7}
+    classA_params = {'nr_samples': [10, 10], 'origin': [[-1.5, 0.5], [1.5, 0.5]], 'spread': [0.2, 0.2]}
+    classB_params = {'nr_samples': 20, 'origin': [0.0, -0.5], 'spread': 0.2}
 
-    C_param = 50
+    C_param = None
 
     classA = np.concatenate((
         np.random.randn(classA_params['nr_samples'][0], 2) * classA_params['spread'][0] + classA_params['origin'][0],
         np.random.randn(classA_params['nr_samples'][1], 2) * classA_params['spread'][1] + classA_params['origin'][1]))
     classB = np.random.randn(classB_params['nr_samples'], 2) * classB_params['spread'] + classB_params['origin']
-
-    classB = list(classB)
-    classB.append([2, 0])
-    classB = np.array(classB)
 
     inputs = np.concatenate((classA, classB))
     targets = np.concatenate((np.ones(classA.shape[0]), -np.ones(classB.shape[0])))
