@@ -18,8 +18,8 @@
 
 import numpy as np
 from scipy import misc
-#from imp import reload
-from given_files.labfuns import *
+from imp import reload
+from labfuns import *
 import random
 
 
@@ -40,13 +40,22 @@ def computePrior(labels, W=None):
     classes = np.unique(labels)
     Nclasses = np.size(classes)
 
-    prior = np.zeros((Nclasses, 1))
+    prior = np.zeros((Nclasses,1))
 
     # TODO: compute the values of prior for each class!
     # ==========================
-    for label in labels:
-        prior[label] += 1
-    prior /= len(labels)
+
+    # Assignment 2, part 1
+    # for k in classes:
+    #     # (prior for a given class) = (number of samples in the class) / (total number of samples)
+    #     prior[k] = np.size(np.where(k == labels)[0]) / len(labels)  # Eq. 12
+
+    # Assignment 5, part 1
+    for k in classes:
+        indices = np.where(labels == k)[0]  # {i | c_i == k}
+
+        prior[k] = sum(W[i] for i in indices)
+
     # ==========================
 
     return prior
@@ -58,7 +67,7 @@ def computePrior(labels, W=None):
 #      sigma - C x d x d matrix of class covariances (sigma[i] - class i sigma)
 def mlParams(X, labels, W=None):
     assert(X.shape[0]==labels.shape[0])
-    Npts, Ndims = np.shape(X)
+    Npts,Ndims = np.shape(X)
     classes = np.unique(labels)
     Nclasses = np.size(classes)
 
@@ -71,17 +80,22 @@ def mlParams(X, labels, W=None):
     # TODO: fill in the code to compute mu and sigma!
     # ==========================
 
-    for curr_class in classes:
+    # Assignment 1
+    # for k in classes:
+    #     indices = np.where(k == labels)[0]  # {i | c_i == k}
+    #     N_k = len(indices)
+    #
+    #     mu[k] = sum(X[i] for i in indices) / N_k  # Eq. (8)
+    #
+    #     sigma[k] = np.diag(1/N_k * sum(pow(X[i] - mu[k], 2) for i in indices))  # Eq. (10)
 
-        class_indices = np.where(labels == curr_class)[0]
-        X_class = X[class_indices, :]
+    # Assignment 4
+    for k in classes:
+        indices = np.where(labels == k)[0]  # {i | c_i == k}
 
-        N_k = len(X_class)
+        mu[k] = sum(W[i] * X[i] for i in indices) / sum(W[i] for i in indices)  # Eq. (13)
 
-        for dim in range(Ndims):
-            mu[curr_class, dim] = sum(X_class[i, dim] for i in range(N_k)) / N_k
-
-        sigma[curr_class] = np.diag(sum(pow(X_class - mu[curr_class], 2)) / N_k)
+        sigma[k] = np.diag((1/sum(W[i] for i in indices)) * sum(W[i] * pow(X[i] - mu[k], 2) for i in indices))  # Eq. (14)
 
     # ==========================
 
@@ -101,15 +115,14 @@ def classifyBayes(X, prior, mu, sigma):
     # TODO: fill in the code to compute the log posterior logProb!
     # ==========================
 
-    for x in X:
+    # Assignment 2, part 2
+    for k in range(Nclasses):
 
-        delta_ks = np.zeros(Nclasses)
+        for i, x in enumerate(X):
 
-        for k in range(Nclasses):
-
-          delta_ks[k] = - 1/2 * np.log(np.sum()) - 1/2 * (x - mu[k]) * pow() + np.log(prior[k])
-
-        break
+            logProb[k, i] = - 1/2 * np.log(np.linalg.det(sigma[k])) \
+                            - 1/2 * np.dot(x - mu[k], np.dot(np.linalg.inv(sigma[k]), np.transpose(x - mu[k]))) \
+                            + np.log(prior[k])  # Eq. (11)
 
     # ==========================
     
@@ -142,26 +155,24 @@ class BayesClassifier(object):
 # 
 # Call `genBlobs` and `plotGaussian` to verify your estimates.
 
-if __name__ == '__main__':
-    X, labels = genBlobs(centers=5)
-    mu, sigma = mlParams(X, labels)
-    prior = computePrior(labels)
-    #plotGaussian(X, labels, mu, sigma)
-    classifyBayes(X, prior, mu, sigma)
+
+# X, labels = genBlobs(centers=5)
+# mu, sigma = mlParams(X,labels)
+# plotGaussian(X,labels,mu,sigma)
 
 
 # Call the `testClassifier` and `plotBoundary` functions for this part.
 
 
-#testClassifier(BayesClassifier(), dataset='iris', split=0.7)
+# testClassifier(BayesClassifier(), dataset='iris', split=0.7)
 
 
 
-#testClassifier(BayesClassifier(), dataset='vowel', split=0.7)
+# testClassifier(BayesClassifier(), dataset='vowel', split=0.7)
 
 
 
-#plotBoundary(BayesClassifier(), dataset='iris',split=0.7)
+# plotBoundary(BayesClassifier(), dataset='iris',split=0.7)
 
 
 # ## Boosting functions to implement
@@ -194,10 +205,36 @@ def trainBoost(base_classifier, X, labels, T=10):
 
         # TODO: Fill in the rest, construct the alphas etc.
         # ==========================
-        
-        # alphas.append(alpha) # you will need to append the new alpha
+
+        # Assignment 5, part 2
+
+        # Translation (equation => code):
+        # t => i_iter
+        # h_t(x_i) => vote[i]
+        # delta(h_t(x_i), c_i) => (1 if vote[i] == labels[i] else 0)
+
+        # Step 2: Calculate error
+        epsilon = sum(wCur[i] * (1 - (1 if vote[i] == labels[i] else 0)) for i in range(Npts))
+
+        # Step 3: Confidence level
+        # One of the classifiers predicted everything correctly, therefore epsilon == 0 which caused and error when
+        # np.log(epsilon) was called. In such a case alpha is set to 2 as that is roughly the value best classifiers
+        # obtained. This problem has probably occurred due to the simple dataset used (iris in this instance).
+        if epsilon == 0:
+            alpha = 2
+        else:
+            alpha = 1/2 * (np.log(1 - epsilon) - np.log(epsilon))
+
+        # Step 4: Update weights
+        for i in range(Npts):
+            wCur[i] *= np.exp((-1 if vote[i] == labels[i] else 1) * alpha)
+
+        wCur /= sum(wCur)  # Normalise, sum(wCur) is shown as Z in the equation.
+
+        alphas.append(alpha)
+
         # ==========================
-        
+
     return classifiers, alphas
 
 # in:       X - N x d matrix of N data points
@@ -218,7 +255,23 @@ def classifyBoost(X, classifiers, alphas, Nclasses):
         # TODO: implement classificiation when we have trained several classifiers!
         # here we can do it by filling in the votes vector with weighted votes
         # ==========================
-        
+
+        # Assignment 5, part 3
+
+        # It would have been preferable have an outer loop for X. Unfortunately classifiers[t].classify() can't classify
+        # individual points (or?), therefore this structure doesn't loop as shown in Eq. (15). Though it produces the
+        # same end result. This can most likely be improved...
+
+        for t in range(Ncomps):
+
+            classifications_t = classifiers[t].classify(X)
+
+            for c_i in range(Nclasses):
+
+                for x_i, ct_i in enumerate(classifications_t):
+
+                    votes[x_i, c_i] += alphas[t] * (1 if ct_i == c_i else 0)
+
         # ==========================
 
         # one way to compute yPred after accumulating the votes
@@ -251,37 +304,37 @@ class BoostClassifier(object):
 # Call the `testClassifier` and `plotBoundary` functions for this part.
 
 
-#testClassifier(BoostClassifier(BayesClassifier(), T=10), dataset='iris',split=0.7)
+# testClassifier(BoostClassifier(BayesClassifier(), T=10), dataset='iris',split=0.7)
 
 
 
-#testClassifier(BoostClassifier(BayesClassifier(), T=10), dataset='vowel',split=0.7)
+# testClassifier(BoostClassifier(BayesClassifier(), T=10), dataset='vowel',split=0.7)
 
 
 
-#plotBoundary(BoostClassifier(BayesClassifier()), dataset='iris',split=0.7)
+# plotBoundary(BoostClassifier(BayesClassifier()), dataset='iris',split=0.7)
 
 
 # Now repeat the steps with a decision tree classifier.
 
 
-#testClassifier(DecisionTreeClassifier(), dataset='iris', split=0.7)
+# testClassifier(DecisionTreeClassifier(), dataset='iris', split=0.7)
 
 
 
-#testClassifier(BoostClassifier(DecisionTreeClassifier(), T=10), dataset='iris',split=0.7)
+# testClassifier(BoostClassifier(DecisionTreeClassifier(), T=10), dataset='iris',split=0.7)
 
 
 
-#testClassifier(DecisionTreeClassifier(), dataset='vowel',split=0.7)
+# testClassifier(DecisionTreeClassifier(), dataset='vowel',split=0.7)
 
 
 
-#testClassifier(BoostClassifier(DecisionTreeClassifier(), T=10), dataset='vowel',split=0.7)
+# testClassifier(BoostClassifier(DecisionTreeClassifier(), T=10), dataset='vowel',split=0.7)
 
 
 
-#plotBoundary(DecisionTreeClassifier(), dataset='iris',split=0.7)
+# plotBoundary(DecisionTreeClassifier(), dataset='iris',split=0.7)
 
 
 

@@ -1,7 +1,0 @@
-C           set of classes
-k           class
-x*          sample
-x           d-dimensional row vector
-mu_k        mean vector
-sigma_k     covariance matrix
-|sigma_k|   determinant
