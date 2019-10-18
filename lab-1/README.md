@@ -1,3 +1,6 @@
+# Decision Trees
+Lab focuses on decision trees where concepts as entropy, information gain and pruning are discussed. It showcases how to build better decision trees with the help of these concepts. 
+
 Lab instructions found in *dectrees-py.pdf*.
 
 Code for the corresponding assignments can be found in the following files inside the *python* directory:
