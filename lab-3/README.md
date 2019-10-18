@@ -1,3 +1,6 @@
+# Bayesian Learning and Boosting
+The lab focuses on the implementation of Naïve Bayes classifier and the boosting algorithm AdaBoost.
+
 Lab instructions found in *lab3.pdf*
 
 The lab could be done in either pure python or jupyter notebook; mine was done in pure python. All code that was added can
