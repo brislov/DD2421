@@ -218,8 +218,8 @@ def trainBoost(base_classifier, X, labels, T=10):
 
         # Step 3: Confidence level
         # One of the classifiers predicted everything correctly, therefore epsilon == 0 which caused and error when
-        # np.log(epsilon) was called. In such a case alpha is set to 2 as that is roughly the value best classifiers
-        # obtained. This problem has probably occurred due to the simple dataset used (iris in this instance).
+        # np.log(epsilon) was called. In such a case alpha is set to 2 as that is roughly the value the best classifiers
+        # obtained. This problem occurred due to the simple dataset used (iris in this instance).
         if epsilon == 0:
             alpha = 2
         else:
