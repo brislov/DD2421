@@ -1,33 +1,31 @@
 from tabulate import tabulate
 
-import given_files.drawtree_qt5 as drawtree
-import given_files.dtree as dtree
-import given_files.monkdata as monkdata
+import python.drawtree_qt5 as drawtree
+import python.dtree as dtree
+import python.monkdata as monkdata
 
-import p4_information_gain as p4
+import python.information_gain as p4
 
 
 if __name__ == '__main__':
 
     # DECISION TREE PART
     # First paragraph
-    subsets = list(dtree.select(monkdata.monk1, monkdata.attributes[4], value) for value in monkdata.attributes[4].values)
-    subset_names = list('Subset{}'.format(i) for i in range(1, len(subsets) + 1))
-    p4.information_gain(subset_names, subsets)  # subsets
+    # subsets = list(dtree.select(monkdata.monk1, monkdata.attributes[4], value) for value in monkdata.attributes[4].values)
+    # subset_names = list('Subset{}'.format(i) for i in range(1, len(subsets) + 1))
+    # p4.information_gain(subset_names, subsets)  # subsets
 
     # Second paragraph
     # drawtree.drawTree(dtree.buildTree(monkdata.monk1, monkdata.attributes, maxdepth=2))
-    s = '\n# Most Common\n'
-    for subset, subset_name in zip(subsets, subset_names):
-        s += '{} {}\n'.format(subset_name, dtree.mostCommon(subset))
-    print(s)
+    # s = '\n# Most Common\n'
+    # for subset, subset_name in zip(subsets, subset_names):
+    #     s += '{} {}\n'.format(subset_name, dtree.mostCommon(subset))
+    # print(s)
 
     # Onwards
-    tree = dtree.buildTree(monkdata.monk1, monkdata.attributes, maxdepth=1)  # Two levels
+    # tree = dtree.buildTree(monkdata.monk1, monkdata.attributes, maxdepth=1)  # Two levels
     # tree = dtree.buildTree(monkdata.monk1, monkdata.attributes)  # All levels
     # drawtree.drawTree(tree)  # Show tree
-
-    print('-' * 80, '\n')
 
     # PERFORMANCE CHECK PART
     name_sets = ('MONK-1', 'MONK-2', 'MONK-3')

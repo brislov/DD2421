@@ -1,7 +1,7 @@
 from tabulate import tabulate
 
-import given_files.dtree as d
-import given_files.monkdata as m
+import python.dtree as d
+import python.monkdata as m
 
 
 if __name__ == '__main__':

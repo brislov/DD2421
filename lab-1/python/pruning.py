@@ -4,8 +4,8 @@ import statistics
 from tabulate import tabulate
 import matplotlib.pyplot as plt
 
-import given_files.dtree as dtree
-import given_files.monkdata as m
+import python.dtree as dtree
+import python.monkdata as m
 
 
 def get_best_tree(currtree):
@@ -67,11 +67,9 @@ if __name__ == '__main__':
 
         print(tabulate(data, header), '\n')
 
-        plt.plot(fractions, mean_errors, marker='o', label='Mean error (test)', color=(0, 0, 1))
-        plt.plot(fractions, stdev, marker='o', label='Standard deviation (test)', color=(0.6, 0.6, 1))
+        plt.errorbar(fractions, mean_errors, yerr=stdev, marker='o')
 
         plt.title('{} (n = {})'.format(dataset_name, n))
-        plt.legend()
-        plt.xlabel('Fraction')
-        plt.ylabel('Mean Error')
+        plt.xlabel('fraction')
+        plt.ylabel('mean error')
         plt.show()

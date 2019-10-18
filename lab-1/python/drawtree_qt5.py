@@ -1,12 +1,15 @@
-#!/usr/bin/env given_files
+#!/usr/bin/env python
 
 import dtree
 import sys
-from PyQt4 import Qt, QtCore, QtGui
 
-class MyPainting(QtGui.QWidget):
+from PyQt5 import QtCore, QtGui
+from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow
+
+
+class MyPainting(QWidget):
     def __init__(self, parent, tree):
-        QtGui.QWidget.__init__(self, parent)
+        QWidget.__init__(self)
         self.tree = tree
         self.xsize = 600
         self.ysize = 300
@@ -29,9 +32,7 @@ class MyPainting(QtGui.QWidget):
         p = QtGui.QPainter()
         p.begin(self)
         p.setPen (QtGui.QPen(QtGui.QColor(0,0,0), 1))
-
         draw(p, self.tree, 10, 10)
-
         p.end()
 
 
@@ -53,19 +54,27 @@ def draw(p, t, x, y):
     return newMid, xx+10
 
 
-class MyMainWindow( QtGui.QMainWindow ):
+class MyMainWindow( QMainWindow ):
     def __init__(self, tree):
-        QtGui.QMainWindow.__init__( self )
-
+        QMainWindow.__init__( self )
         paint = MyPainting(self, tree)
-
         self.setCentralWidget(paint)
-
         self.show()
 
 
 def drawTree(tree):
-    application = QtGui.QApplication( sys.argv )
-    win = MyMainWindow(tree)
+    application = QApplication(sys.argv)
+    win = MyMainWindow(tree)  
+
     win.show()
     sys.exit(application.exec_())
+
+
+
+
+
+
+
+
+
+
